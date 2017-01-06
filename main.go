@@ -83,15 +83,13 @@ func are_connected(g *UndirectedGraph, nodes map[int]bool) bool {
 	return true
 }
 
-func print_subgraph_counts(g *UndirectedGraph) {
-	ch := make(chan map[int]bool)
-	go enumerate_subsets(len(g.Nodes()), ch)
-	results := make(map[int]int)
-	for subset := range ch {
+func subset_consumer(g *UndirectedGraph, in chan map[int]bool, out chan int) {
+	defer close(out)
+	for subset := range in {
 		size := len(subset)
 		switch {
 		case size <= 1:
-			results[size]++
+			out <- size
 		case size == 2:
 			var nodes [2]Node
 			i := 0
@@ -101,13 +99,24 @@ func print_subgraph_counts(g *UndirectedGraph) {
 			}
 
 			if g.HasEdgeBetween(nodes[0], nodes[1]) {
-				results[size]++
+				out <- size
 			}
 		default:
 			if are_connected(g, subset) {
-				results[size]++
+				out <- size
 			}
 		}
+	}
+}
+
+func print_subgraph_counts(g *UndirectedGraph) {
+	ch := make(chan map[int]bool)
+	ch_out := make(chan int)
+	go enumerate_subsets(len(g.Nodes()), ch)
+	go subset_consumer(g, ch, ch_out)
+	results := make(map[int]int)
+	for res := range ch_out {
+		results[res]++
 	}
 	for i := 1; i <= len(g.Nodes()); i++ {
 		fmt.Println(i, ":", results[i])
