@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gonum/graph"
 	. "github.com/gonum/graph/simple"
-	"sync"
 )
 
 func enumerate_subsets(n int, ch chan map[int]bool) {
@@ -40,37 +39,35 @@ func peterson_graph() *UndirectedGraph {
 	return g
 }
 
+func not_peterson_graph() *UndirectedGraph {
+	g := NewUndirectedGraph(0.0, 0.0)
+	for i := 2; i <= 10; i++ {
+		g.SetEdge(Edge{Node(i), Node(i - 1), 0.0})
+	}
+	g.SetEdge(Edge{Node(2), Node(10), 0.0})
+	g.SetEdge(Edge{Node(3), Node(7), 0.0})
+	g.SetEdge(Edge{Node(4), Node(9), 0.0})
+	g.SetEdge(Edge{Node(6), Node(10), 0.0})
+	g.SetEdge(Edge{Node(1), Node(5), 0.0})
+	g.SetEdge(Edge{Node(1), Node(7), 0.0})
+	return g
+}
+
 func are_connected(g *UndirectedGraph, nodes map[int]bool) bool {
-	var mtx sync.Mutex
-	var recurse func(graph.Node, *sync.WaitGroup)
-	recurse = func(n graph.Node, wg *sync.WaitGroup) {
-		defer wg.Done()
-		mtx.Lock()
-		already_found, ok := nodes[n.ID()]
-		if ok {
-			if already_found {
-				mtx.Unlock()
-				return
-			}
-			var wg_inner sync.WaitGroup
+	var recurse func(n graph.Node)
+	recurse = func(n graph.Node) {
+		if already_found, ok := nodes[n.ID()]; ok && !already_found {
 			nodes[n.ID()] = true
-			mtx.Unlock()
 			for _, neighbor := range g.From(n) {
-				wg_inner.Add(1)
-				go recurse(neighbor, &wg_inner)
+				recurse(neighbor)
 			}
-			wg_inner.Wait()
-		} else {
-			mtx.Unlock()
 		}
 	}
 
-	var wg sync.WaitGroup
 	for nid := range nodes {
-		wg.Add(1)
-		go recurse(Node(nid), &wg)
+		recurse(Node(nid))
+		break
 	}
-	wg.Wait()
 	for _, v := range nodes {
 		if !v {
 			return false
@@ -79,9 +76,8 @@ func are_connected(g *UndirectedGraph, nodes map[int]bool) bool {
 	return true
 }
 
-func main() {
+func print_subgraph_counts(g *UndirectedGraph) {
 	ch := make(chan map[int]bool)
-	var g *UndirectedGraph = peterson_graph()
 	go enumerate_subsets(len(g.Nodes()), ch)
 	results := make(map[int]int)
 	for subset := range ch {
@@ -109,4 +105,12 @@ func main() {
 	for i := 1; i <= len(g.Nodes()); i++ {
 		fmt.Println(i, ":", results[i])
 	}
+}
+
+func main() {
+	var g *UndirectedGraph = peterson_graph()
+	var h *UndirectedGraph = not_peterson_graph()
+	print_subgraph_counts(g)
+	fmt.Println("--")
+	print_subgraph_counts(h)
 }
