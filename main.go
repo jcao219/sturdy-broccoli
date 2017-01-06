@@ -6,6 +6,10 @@ import (
 	. "github.com/gonum/graph/simple"
 )
 
+// enumerate_subsets all subsets of the set {1 .. n}
+// and puts them in the channel ch in the form of
+// the elements of the subset as keys
+// and the values as all false
 func enumerate_subsets(n int, ch chan map[int]bool) {
 	defer close(ch)
 	if n == 0 {
@@ -53,6 +57,9 @@ func not_peterson_graph() *UndirectedGraph {
 	return g
 }
 
+// Takes an UndirectedGraph g and a list of nodes
+// (Nodes in the form of map[int]bool where it is initially all false)
+// And determines if they form a connected subgraph.
 func are_connected(g *UndirectedGraph, nodes map[int]bool) bool {
 	var recurse func(n graph.Node)
 	recurse = func(n graph.Node) {
