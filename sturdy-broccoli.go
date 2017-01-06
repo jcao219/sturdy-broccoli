@@ -57,6 +57,17 @@ func not_peterson_graph() *UndirectedGraph {
 	return g
 }
 
+func sample_graph() (g *UndirectedGraph) {
+	g = NewUndirectedGraph(0.0, 0.0)
+	g.SetEdge(Edge{Node(1), Node(2), 0.0})
+	g.SetEdge(Edge{Node(1), Node(3), 0.0})
+	g.SetEdge(Edge{Node(1), Node(4), 0.0})
+	g.SetEdge(Edge{Node(1), Node(5), 0.0})
+	g.SetEdge(Edge{Node(6), Node(3), 0.0})
+	g.SetEdge(Edge{Node(6), Node(5), 0.0})
+	return
+}
+
 // Takes an UndirectedGraph g and a list of nodes
 // (Nodes in the form of map[int]bool where it is initially all false)
 // And determines if they form a connected subgraph.
@@ -133,4 +144,6 @@ func main() {
 	print_subgraph_counts(g)
 	fmt.Println("--")
 	print_subgraph_counts(h)
+	fmt.Println("--")
+	print_subgraph_counts(sample_graph())
 }
