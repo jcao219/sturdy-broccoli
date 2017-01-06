@@ -106,5 +106,7 @@ func main() {
 			}
 		}
 	}
-	fmt.Println(results)
+	for i := 1; i <= len(g.Nodes()); i++ {
+		fmt.Println(i, ":", results[i])
+	}
 }
