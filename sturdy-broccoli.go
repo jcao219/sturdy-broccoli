@@ -118,8 +118,12 @@ func print_subgraph_counts(g *UndirectedGraph) {
 	for res := range ch_out {
 		results[res]++
 	}
-	for i := 1; i <= len(g.Nodes()); i++ {
-		fmt.Println(i, ":", results[i])
+	for i := 0; i <= len(g.Nodes()); i++ {
+		if i == len(g.Nodes()) {
+			fmt.Println(results[i])
+		} else {
+			fmt.Printf("%d,", results[i])
+		}
 	}
 }
 
