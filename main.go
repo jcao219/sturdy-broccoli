@@ -83,7 +83,7 @@ func are_connected(g *UndirectedGraph, nodes map[int]bool) bool {
 	return true
 }
 
-func subset_consumer(g *UndirectedGraph, in chan map[int]bool, out chan int) {
+func connected_subset_filter(g *UndirectedGraph, in chan map[int]bool, out chan int) {
 	defer close(out)
 	for subset := range in {
 		size := len(subset)
@@ -113,7 +113,7 @@ func print_subgraph_counts(g *UndirectedGraph) {
 	ch := make(chan map[int]bool)
 	ch_out := make(chan int)
 	go enumerate_subsets(len(g.Nodes()), ch)
-	go subset_consumer(g, ch, ch_out)
+	go connected_subset_filter(g, ch, ch_out)
 	results := make(map[int]int)
 	for res := range ch_out {
 		results[res]++
