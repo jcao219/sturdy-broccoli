@@ -19,12 +19,12 @@ func enumerate_subsets(n int, ch chan map[int]bool) {
 		ch_rec := make(chan map[int]bool)
 		go enumerate_subsets(n-1, ch_rec)
 		for subset := range ch_rec {
-			ch <- subset
 			subset2 := make(map[int]bool, len(subset)+1)
 			for k := range subset {
 				subset2[k] = false
 			}
 			subset2[n] = false
+			ch <- subset
 			ch <- subset2
 		}
 	}
